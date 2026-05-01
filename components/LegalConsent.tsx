@@ -12,11 +12,12 @@ const generatePDFDocument = async (htmlContent: HTMLElement, fileName: string) =
   const html2pdf = (await import("html2pdf.js")).default;
   
   const opt = {
-    margin:       15,
+    margin:       [10, 0, 10, 0],
     filename:     fileName,
     image:        { type: 'jpeg' as const, quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+    html2canvas:  { scale: 2, windowWidth: 800 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const },
+    pagebreak:    { mode: 'avoid-all' }
   };
 
   await html2pdf().set(opt).from(htmlContent).save();
@@ -79,7 +80,7 @@ export function LegalConsent() {
       
       // Construir el HTML estricto
       container.innerHTML = `
-        <div style="font-family: serif; font-size: 12px; line-height: 1.4; color: #000; text-align: justify;">
+        <div style="width: 800px; padding: 40px; font-family: serif; font-size: 11px; line-height: 1.35; color: #000; text-align: justify; box-sizing: border-box;">
           <p style="font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 14px;">
             CONSENTIMIENTO INFORMADO ACERCA DE LA RECOGIDA DE DATOS PERSONALES PARA USUARIOS DEL PROGRAMA “Ni Un Hogar Sin Energía”
           </p>
@@ -135,18 +136,18 @@ export function LegalConsent() {
             Manifiesto que he sido informado de los epígrafes anteriores y EXPRESO MI CONSENTIMIENTO al amparo de la normativa vigente en protección de datos personales.
           </p>
           
-          <div style="margin-top: 30px;">
-            <p style="margin-bottom: 16px;">En <strong>${data.lugar}</strong>, a <strong>${formattedDate}</strong></p>
+          <div style="margin-top: 20px; break-inside: avoid; page-break-inside: avoid;">
+            <p style="margin-bottom: 12px;">En <strong>${data.lugar}</strong>, a <strong>${formattedDate}</strong></p>
             
-            <div style="margin-bottom: 24px;">
+            <div style="margin-bottom: 16px;">
               <p style="margin-bottom: 4px;"><strong>Nombre y apellidos:</strong> ${data.nombreApellidos}</p>
               <p style="margin-bottom: 4px;"><strong>DNI / NIE:</strong> ${data.dni}</p>
               <p style="margin-bottom: 4px;"><strong>Teléfono:</strong> ${data.telefono}</p>
             </div>
 
             <div>
-              <p style="font-weight: bold; margin-bottom: 10px;">Firma del usuario:</p>
-              <img src="${signature}" alt="Firma" style="max-width: 300px; height: auto; border-bottom: 1px solid #000;" />
+              <p style="font-weight: bold; margin-bottom: 8px;">Firma del usuario:</p>
+              <img src="${signature}" alt="Firma" style="max-width: 200px; max-height: 100px; object-fit: contain; border-bottom: 1px solid #000;" />
             </div>
           </div>
         </div>
