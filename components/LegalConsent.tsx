@@ -169,7 +169,7 @@ export function LegalConsent() {
     <div className="w-full max-w-4xl mx-auto space-y-8">
       {/* Contenedor del Texto Legal Visible */}
       <div className="bg-white border border-gray-300 rounded-md shadow-sm p-6 lg:p-8">
-        <div className="max-h-[60vh] overflow-y-auto pr-4 text-sm text-gray-800 leading-relaxed space-y-4 font-serif">
+        <div className="max-h-[60vh] overflow-y-auto pr-4 text-sm text-gray-900 leading-relaxed space-y-4 font-serif">
           <p className="font-bold text-center mb-6">
             CONSENTIMIENTO INFORMADO ACERCA DE LA RECOGIDA DE DATOS PERSONALES PARA USUARIOS DEL PROGRAMA “Ni Un Hogar Sin Energía”
           </p>
@@ -239,7 +239,7 @@ export function LegalConsent() {
               placeholder="Zaragoza"
               {...register("lugar")}
               className={cn(
-                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900",
                 errors.lugar ? "border-red-500" : "border-gray-300"
               )}
             />
@@ -253,7 +253,7 @@ export function LegalConsent() {
               type="date"
               {...register("fecha")}
               className={cn(
-                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900",
                 errors.fecha ? "border-red-500" : "border-gray-300"
               )}
             />
@@ -267,7 +267,7 @@ export function LegalConsent() {
               type="text"
               {...register("nombreApellidos")}
               className={cn(
-                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900",
                 errors.nombreApellidos ? "border-red-500" : "border-gray-300"
               )}
             />
@@ -281,7 +281,7 @@ export function LegalConsent() {
               type="text"
               {...register("dni")}
               className={cn(
-                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900",
                 errors.dni ? "border-red-500" : "border-gray-300"
               )}
             />
@@ -295,7 +295,7 @@ export function LegalConsent() {
               type="tel"
               {...register("telefono")}
               className={cn(
-                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm",
+                "mt-1 block w-full rounded-md border p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm text-gray-900",
                 errors.telefono ? "border-red-500" : "border-gray-300"
               )}
             />
