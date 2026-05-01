@@ -32,3 +32,11 @@ bun dev
 ```
 
 Abre [http://localhost:3000](http://localhost:3000) en tu navegador para ver el resultado.
+
+## Despliegue
+
+La aplicación se despliega automáticamente en GitHub Pages usando GitHub Actions.
+
+- **URL de la web pública**: [https://marcosboj.github.io/firmas-lopd-pe/](https://marcosboj.github.io/firmas-lopd-pe/)
+
+Cada vez que se hace un `push` a la rama `main`, la acción de GitHub empaqueta la aplicación como sitio estático y actualiza la página publicada. No es necesario realizar pasos de construcción (build) manuales en local para desplegar.
