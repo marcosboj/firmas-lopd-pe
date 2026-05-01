@@ -154,7 +154,7 @@ export function LegalConsent() {
 
       // Sanitizar el nombre para el archivo
       const safeName = data.nombreApellidos.replace(/[^a-zA-Z0-9]/g, "_");
-      const fileName = \`LOPD_ECODES_\${safeName}.pdf\`;
+      const fileName = `LOPD_ECODES_${safeName}.pdf`;
 
       await generatePDFDocument(container, fileName);
     } catch (error) {
