@@ -12,7 +12,7 @@ const generatePDFDocument = async (htmlContent: HTMLElement, fileName: string) =
   const html2pdf = (await import("html2pdf.js")).default;
   
   const opt = {
-    margin:       [10, 0, 10, 0],
+    margin:       [10, 0, 10, 0] as [number, number, number, number],
     filename:     fileName,
     image:        { type: 'jpeg' as const, quality: 0.98 },
     html2canvas:  { scale: 2, windowWidth: 800 },
