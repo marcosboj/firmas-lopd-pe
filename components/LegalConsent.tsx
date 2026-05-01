@@ -1,10 +1,26 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { cn } from "@/lib/utils";
+import { SignaturePad } from "./SignaturePad";
+
+// Importación dinámica para evitar problemas con SSR en Next.js
+const generatePDFDocument = async (htmlContent: HTMLElement, fileName: string) => {
+  const html2pdf = (await import("html2pdf.js")).default;
+  
+  const opt = {
+    margin:       15,
+    filename:     fileName,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  await html2pdf().set(opt).from(htmlContent).save();
+};
 
 const formSchema = z.object({
   lugar: z.string().min(1, "El lugar es obligatorio"),
@@ -16,13 +32,22 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const MESES = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
+
 export function LegalConsent() {
+  const [signature, setSignature] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
+    mode: "onChange",
     defaultValues: {
       lugar: "",
       fecha: "",
@@ -32,15 +57,117 @@ export function LegalConsent() {
     },
   });
 
-  const onSubmit = (data: FormValues) => {
-    // Aquí implementaremos el envío en el futuro
-    console.log("Formulario enviado:", data);
-    alert("Formulario enviado correctamente (ver consola)");
+  const onSubmit = async (data: FormValues) => {
+    if (!signature) return;
+
+    setIsGenerating(true);
+
+    try {
+      // Formatear fecha de "YYYY-MM-DD" a "Día de Mes de Año"
+      const dateParts = data.fecha.split("-");
+      let formattedDate = data.fecha;
+      if (dateParts.length === 3) {
+        const year = dateParts[0];
+        const monthIndex = parseInt(dateParts[1], 10) - 1;
+        const day = parseInt(dateParts[2], 10);
+        const monthName = MESES[monthIndex] || dateParts[1];
+        formattedDate = `${day} de ${monthName} de ${year}`;
+      }
+
+      // Crear contenedor off-screen
+      const container = document.createElement("div");
+      
+      // Construir el HTML estricto
+      container.innerHTML = `
+        <div style="font-family: serif; font-size: 12px; line-height: 1.4; color: #000; text-align: justify;">
+          <p style="font-weight: bold; text-align: center; margin-bottom: 20px; font-size: 14px;">
+            CONSENTIMIENTO INFORMADO ACERCA DE LA RECOGIDA DE DATOS PERSONALES PARA USUARIOS DEL PROGRAMA “Ni Un Hogar Sin Energía”
+          </p>
+          <p style="margin-bottom: 12px;">
+            Conforme a lo exigido en la normativa vigente en protección de datos personales se da cumplimiento a la obligación de informar al interesado acerca de los siguientes epígrafes:
+          </p>
+          
+          <div style="margin-bottom: 12px;">
+            <p style="font-weight: bold; margin-bottom: 4px;">RESPONSABLE DE SUS DATOS PERSONALES</p>
+            <p>Sus datos personales pasarán a disposición de FUNDACIÓN ECOLOGÍA Y DESARROLLO, NIF ESG50503523 Plaza San Bruno 9, 1º Oficinas 50001 Zaragoza Delegado de Protección de Datos: dpo.ecodes@portalartico.es</p>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="font-weight: bold; margin-bottom: 4px;">FINALIDADES</p>
+            <ul style="margin: 0; padding-left: 20px;">
+              <li>Contactar para dar cita para el asesoramiento energético</li>
+              <li>Realizar un diagnóstico energético para emitir un informe personalizado con recomendaciones sobre optimización de los contratos de suministro energético y hábitos y medidas de eficiencia energética en el hogar, así como acompañar en la tramitación del bono social, si aplica.</li>
+              <li>Hacer seguimiento de las recomendaciones, para lo cual podremos comunicarnos tanto por teléfono (incluidas apps de mensajería), como por correo postal o electrónico.</li>
+            </ul>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="font-weight: bold; margin-bottom: 4px;">LEGITIMACIÓN</p>
+            <ul style="margin: 0; padding-left: 20px;">
+              <li>Interés legítimo</li>
+              <li>Consentimiento del interesado (otorgado firmando el presente formulario).</li>
+            </ul>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="font-weight: bold; margin-bottom: 4px;">DESTINATARIOS</p>
+            <p>No se cederán datos a terceros, salvo obligación legal, con la excepción del envío de la solicitud de bono social a la comercializadora regulada correspondiente, si aplica. No se realizarán transferencias de datos internacionales.</p>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="font-weight: bold; margin-bottom: 4px;">PLAZOS DE CONSERVACIÓN</p>
+            <p>Los datos personales se mantendrán durante el tiempo necesario para la adecuada gestión del servicio proporcionado, o en cualquier caso, durante un periodo de cinco años.</p>
+            <p>ECODES se reserva el derecho a usar los resultados del estudio, de manera anonimizada, con fines estadísticos.</p>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="font-weight: bold; margin-bottom: 4px;">DERECHOS</p>
+            <p>Usted puede ejercitar los derechos que por normativa de protección de datos personales le asisten (acceso, rectificación, supresión y derecho al olvido, limitación del tratamiento, portabilidad, oposición al tratamiento, revocación del consentimiento otorgado) presencialmente o por correo postal o electrónico en: Ni un hogar sin Energía ECODES, Plaza San Bruno 9, 1º Oficinas 5 Zaragoza 50001 dpo.ecodes@portalartico.es</p>
+          </div>
+
+          <div style="margin-bottom: 12px;">
+            <p style="font-weight: bold; margin-bottom: 4px;">INFORMACIÓN ADICIONAL</p>
+            <p>Puede encontrar más información sobre sus derechos en www.ecodes.org. Igualmente puede obtener más información y/o presentar una reclamación por medio de los datos de contacto del responsable del tratamiento o ante la Agencia Española de Protección de Datos.</p>
+            <p>En el caso de que se produzca alguna modificación de sus datos le rogamos que nos comunique por escrito dicha modificación, con la finalidad de mantener actualizados sus datos.</p>
+          </div>
+
+          <p style="font-weight: bold; margin-top: 16px; margin-bottom: 24px;">
+            Manifiesto que he sido informado de los epígrafes anteriores y EXPRESO MI CONSENTIMIENTO al amparo de la normativa vigente en protección de datos personales.
+          </p>
+          
+          <div style="margin-top: 30px;">
+            <p style="margin-bottom: 16px;">En <strong>${data.lugar}</strong>, a <strong>${formattedDate}</strong></p>
+            
+            <div style="margin-bottom: 24px;">
+              <p style="margin-bottom: 4px;"><strong>Nombre y apellidos:</strong> ${data.nombreApellidos}</p>
+              <p style="margin-bottom: 4px;"><strong>DNI / NIE:</strong> ${data.dni}</p>
+              <p style="margin-bottom: 4px;"><strong>Teléfono:</strong> ${data.telefono}</p>
+            </div>
+
+            <div>
+              <p style="font-weight: bold; margin-bottom: 10px;">Firma del usuario:</p>
+              <img src="${signature}" alt="Firma" style="max-width: 300px; height: auto; border-bottom: 1px solid #000;" />
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Sanitizar el nombre para el archivo
+      const safeName = data.nombreApellidos.replace(/[^a-zA-Z0-9]/g, "_");
+      const fileName = \`LOPD_ECODES_\${safeName}.pdf\`;
+
+      await generatePDFDocument(container, fileName);
+    } catch (error) {
+      console.error("Error al generar el PDF:", error);
+      alert("Hubo un error al generar el PDF. Por favor, inténtelo de nuevo.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-8">
-      {/* Contenedor del Texto Legal */}
+      {/* Contenedor del Texto Legal Visible */}
       <div className="bg-white border border-gray-300 rounded-md shadow-sm p-6 lg:p-8">
         <div className="max-h-[60vh] overflow-y-auto pr-4 text-sm text-gray-800 leading-relaxed space-y-4 font-serif">
           <p className="font-bold text-center mb-6">
@@ -100,10 +227,10 @@ export function LegalConsent() {
         </div>
       </div>
 
-      {/* Formulario de Captura */}
-      <form onSubmit={handleSubmit(onSubmit)} className="bg-white border border-gray-300 rounded-md shadow-sm p-6 lg:p-8">
+      {/* Formulario y Firma */}
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white border border-gray-300 rounded-md shadow-sm p-6 lg:p-8 space-y-8">
+        
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
           <div className="space-y-2">
             <label htmlFor="lugar" className="block text-sm font-medium text-gray-700">En (Lugar)</label>
             <input
@@ -174,17 +301,37 @@ export function LegalConsent() {
             />
             {errors.telefono && <p className="text-red-500 text-xs">{errors.telefono.message}</p>}
           </div>
-
         </div>
 
-        <div className="mt-8">
+        {/* Zona de Firma */}
+        <div className="pt-4 border-t border-gray-200">
+          <SignaturePad 
+            onEnd={(base64) => setSignature(base64)} 
+            onClear={() => setSignature(null)} 
+          />
+        </div>
+
+        {/* Botón de Envío */}
+        <div className="pt-4">
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+            disabled={!isValid || !signature || isGenerating}
+            className={cn(
+              "w-full py-3 px-4 rounded-md font-medium text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2",
+              isValid && signature && !isGenerating
+                ? "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+                : "bg-gray-400 cursor-not-allowed"
+            )}
           >
-            Continuar
+            {isGenerating ? "Generando PDF..." : "Generar Documento PDF"}
           </button>
+          {(!isValid || !signature) && (
+            <p className="mt-2 text-sm text-center text-gray-500">
+              Debes rellenar todos los campos y firmar para generar el documento.
+            </p>
+          )}
         </div>
+
       </form>
     </div>
   );
